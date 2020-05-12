@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Matteo Agostini <matteo.agostini@ph.tum.de>
+// Copyright (C) 2014 Matteo Agostini <matteo.agostini@ph.tum.de>
 
 // This is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by
@@ -136,9 +136,6 @@ class MSModelT: public MSModel {
       void SetPDFBuilder(TPDF* pdf) {delete fPDFBuilder; fPDFBuilder = pdf;}
       //! Get the pointer to the pdf builder
       TPDF* GetPDFBuilder() const {return fPDFBuilder;}
-
-      //! Check consistency between PDF's and data set
-      virtual bool AreInputHistsConsistent () = 0;
 
    protected:
       //! pointer to the data set 

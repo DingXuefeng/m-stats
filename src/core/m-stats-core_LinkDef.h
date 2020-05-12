@@ -14,7 +14,6 @@
 #pragma link C++ class mst::MSModelTHnBMLF-!;
 #pragma link C++ class mst::MSModelPullGaus-!;
 #pragma link C++ class mst::MSMinimizer-!;
-#pragma link C++ class mst::MSTHnHandler-!;
 
 #endif // __CLING__
 

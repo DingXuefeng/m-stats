@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Matteo Agostini <matteo.agostini@ph.tum.de>
+// Copyright (C) 2016 Matteo Agostini <matteo.agostini@ph.tum.de>
 
 // This is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by
@@ -36,7 +36,7 @@ double MSModelTHnBMLF::NLogLikelihood(double* par)
       exit(1);
    }
    if (fDataSet == 0) {
-      std::cerr << "NLogLikelihood >> error: DataHist not set\n";
+      std::cerr << "NLogLikelihood >> error: DataHist of unknown object type\n";
       exit(1);
    }
 
@@ -51,28 +51,6 @@ double MSModelTHnBMLF::NLogLikelihood(double* par)
    delete pdf;
    delete it;
    return (-logLikelihood);
-}
-
-bool MSModelTHnBMLF::AreInputHistsConsistent () 
-{
-   const THn* pdf = fPDFBuilder->GetPDF("tmpPDF");
-   if (pdf == 0) {
-      std::cerr << "error: PDFBuilder returned unknown object type\n";
-      exit(1);
-   }
-   if (fDataSet == 0) {
-      std::cerr << "error: DataHist not set\n";
-      exit(1);
-   }
-
-   if (fDataSet->GetNdimensions() != pdf->GetNdimensions()) return false;
-   for (int i = 0; i < fDataSet->GetNdimensions(); i++) {
-      if (fDataSet->GetAxis(i)->GetNbins() != pdf->GetAxis(i)->GetNbins()) return false;
-      if (fDataSet->GetAxis(i)->GetXmin()  != pdf->GetAxis(i)->GetXmin() ) return false;
-      if (fDataSet->GetAxis(i)->GetXmax()  != pdf->GetAxis(i)->GetXmax() ) return false;
-   }
-   return true;
-
 }
 
 } // namespace mst

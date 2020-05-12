@@ -21,8 +21,7 @@ libm_stats_core_la_SOURCES = \
 	MSModelPulls.cxx \
 	MSModelTHnBMLF.cxx \
 	MSPDFBuilderTHn.cxx \
-	MSParameter.cxx \
-	MSTHnHandler.cxx
+	MSParameter.cxx
 
 libm_stats_core_la_headers = \
 	MSConfig.h \
@@ -35,9 +34,7 @@ libm_stats_core_la_headers = \
 	MSModelTHnBMLF.h \
 	MSObject.h \
 	MSPDFBuilderTHn.h \
-	MSParameter.h \
-	MSTHnHandler.h
-
+	MSParameter.h 
 
 pkginclude_HEADERS = $(libm_stats_core_la_headers)
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Matteo Agostini <matteo.agostini@ph.tum.de>
+// Copyright (C) 2016 Matteo Agostini <matteo.agostini@ph.tum.de>
 
 // This is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by
@@ -52,9 +52,6 @@ class MSModelTHnBMLF : public MSModelT<THnBase,MSPDFBuilderTHn>
       //! function returning the negative log likelihood function to be 
       //! minimized (NLL)
       double NLogLikelihood(double* par) override;
-
-      //! Check consistency between PDF's and data set
-      bool AreInputHistsConsistent () override;
 };
 
 } // namespace mst

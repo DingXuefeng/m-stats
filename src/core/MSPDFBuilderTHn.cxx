@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Matteo Agostini <matteo.agostini@ph.tum.de>
+// Copyright (C) 2016 Matteo Agostini <matteo.agostini@ph.tum.de>
 
 // This is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by
@@ -19,6 +19,7 @@
 
 // ROOT libgs
 #include <TFile.h>
+#include <TH1.h>
 #include <THnBase.h>
 #include <TROOT.h>
 
@@ -44,16 +45,103 @@ MSPDFBuilderTHn::~MSPDFBuilderTHn()
    delete fRnd;
 }
 
-void MSPDFBuilderTHn::RegisterHist(THn* hist) {
+void MSPDFBuilderTHn::LoadHist(const std::string& fileName, 
+      const std::string& histName, const std::string& newHistName,
+      const Int_t  ndim_pr, const Int_t* dim_pr) {
 
    // Check if an hist with the same name was already loaded
-  if (fHistMap->find(hist->GetName()) != fHistMap->end()) {
+  if (fHistMap->find(newHistName) != fHistMap->end()) {
     std::cerr << "error: PDF already loaded\n";
     return;
   }
 
-  fHistMap->insert( HistPair( hist->GetName(), hist));
+  // Get pointer of the file 
+  TFile inputFile(fileName.c_str(), "READ");
+  if(inputFile.IsOpen() == kFALSE) {
+    std::cerr << "error: input file not found\n";
+    exit(1);
+  }
+
+  // load new hist checking for the type
+  TObject* hist = inputFile.Get(histName.c_str());
+  if (!hist) {
+    std::cerr << "error: PDF " << newHistName
+              << " not found in the file\n";
+    exit(1);
+  } else {
+     THn* tmp = nullptr;
+     // Create local THn
+     if (dynamic_cast<THnBase*>(hist)) {
+        tmp = THn::CreateHn(newHistName.c_str(), newHistName.c_str(), 
+              dynamic_cast<THnBase*>(hist));
+     } else if (dynamic_cast<TH1*>(hist)) {
+        tmp = THn::CreateHn(newHistName.c_str(), newHistName.c_str(), 
+              dynamic_cast<TH1*>(hist));
+     } else {
+        std::cerr << "error: PDF " << newHistName
+                  << " is not of type THnBase or TH1\n";
+       exit(1);
+     }
+
+     if (dim_pr == nullptr) {
+        tmp->SetName(newHistName.c_str());
+        tmp->SetTitle(newHistName.c_str());
+        fHistMap->insert( HistPair( newHistName, tmp));
+     } else {
+        THn* tmp_pr = tmp->Projection(ndim_pr, dim_pr);
+        delete tmp;
+        tmp_pr->SetName(newHistName.c_str());
+        tmp_pr->SetTitle(newHistName.c_str());
+        fHistMap->insert( HistPair( newHistName, tmp_pr));
+     }
+     delete hist;
+  }
+  
+
+  inputFile.Close();
   return;
+}
+
+
+void MSPDFBuilderTHn::NormalizeHists(bool respectAxisUserRange) {
+   // loop over all hist loaded
+   for (auto im : *fHistMap) {
+      // loop over dimensions
+      auto it = im.second->CreateIter(respectAxisUserRange);
+      Long64_t i = 0;
+      double integral = 0;
+      while ((i = it->Next()) >= 0) integral += im.second->GetBinContent(i);
+      im.second->Scale(1./integral);
+   }
+}
+
+void MSPDFBuilderTHn::SetRangeUser(double min, double max, int axis) {
+   // loop over all hists
+   for (auto im : *fHistMap) {
+      if (im.second->GetAxis(axis) != nullptr)
+         im.second->GetAxis(axis)->SetRangeUser(min,max);
+   }
+}
+
+void MSPDFBuilderTHn::Rebin(Int_t* ngroup) {
+   // a hist map is filled and then substitute to the original one
+   // because the method THn doesn not provide a method that modyfy the object
+   // itself
+   auto newHistMap = new HistMap;
+   for (auto im : *fHistMap) {
+      THn* newPdf = im.second->Rebin(ngroup);
+      newPdf->SetName(im.second->GetName());
+      newPdf->SetTitle(im.second->GetTitle());
+      newHistMap->insert( HistPair( newPdf->GetName(), newPdf));
+   }
+
+   // Clean up old map 
+   for (auto im : *fHistMap) delete im.second;
+   fHistMap->clear();
+   delete fHistMap;
+
+   // swap new map
+  fHistMap = newHistMap;
 }
 
 
