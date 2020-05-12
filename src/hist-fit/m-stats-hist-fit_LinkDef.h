@@ -4,6 +4,7 @@
 #ifdef __CLING__
 
 //#pragma link C++ class mst::MSObject-!;
+#pragma link C++ class mst::BXModelPulls-;
 
 #endif // __CLING__
 
